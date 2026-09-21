@@ -1,0 +1,16 @@
+{
+  "schema":"marketarena.packet.v2",
+  "round_id":"S0-R0001-OPENING-BELL-LIVE",
+  "status":"PAPER_LIVE_PREMARKET",
+  "packet_cutoff":"2026-09-21T08:25:00-04:00",
+  "exchange_timezone":"America/New_York",
+  "execution_rule":{"paper_only":true,"decision_cutoff":"2026-09-21T09:20:00-04:00","execution_time":"2026-09-21T09:30:00-04:00","slippage_bps":5},
+  "universe":["AAPL","NVDA","AMZN","META"],
+  "market":{"session":"pre-market","quotes":{
+    "AAPL":{"regular_close":336.13,"observed_price":336.36,"observed_at":"2026-09-21T08:20:10-04:00","gap_pct_vs_regular_close":0.068},
+    "NVDA":{"regular_close":222.27,"observed_price":224.58,"observed_at":"2026-09-21T07:58:03-04:00","gap_pct_vs_regular_close":1.039},
+    "AMZN":{"regular_close":253.71,"observed_price":255.40,"observed_at":"2026-09-21T07:38:23-04:00","gap_pct_vs_regular_close":0.666},
+    "META":{"regular_close":665.75,"observed_price":682.59,"observed_at":"2026-09-21T07:49:09-04:00","gap_pct_vs_regular_close":2.529}
+  }},
+  "provenance":{"truth_class":"paper-live-input","limitations":["Public web snapshots, not an exchange-grade licensed feed.","No model output is included in this packet.","Paper-trading research experiment; not investment advice."]}
+}
