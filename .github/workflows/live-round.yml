@@ -29,9 +29,10 @@ concurrency:
 jobs:
   live-round:
     runs-on: ubuntu-latest
+    environment: github-pages
     timeout-minutes: 20
     env:
-      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY || secrets.OPENROUTER_KEY }}
     steps:
       - uses: actions/checkout@v4
         with:
