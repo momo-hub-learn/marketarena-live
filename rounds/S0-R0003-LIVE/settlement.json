@@ -1,0 +1,220 @@
+{
+  "schema": "marketarena.settlement.v1",
+  "round_id": "S0-R0003-LIVE",
+  "status": "INTRADAY",
+  "execution_rule": "First regular-session 1m bar at/after the first whole minute following reveal; ADD receives 5 bps adverse paper slippage.",
+  "mark_rule": "Latest available regular-session 1m close; becomes final after regular market end.",
+  "generated_at": "2026-09-21T16:14:08.136813Z",
+  "market": {
+    "AAPL": {
+      "execution_reference": {
+        "ts": "2026-09-21T16:12:00Z",
+        "price": 338.6400146484375
+      },
+      "mark": {
+        "ts": "2026-09-21T16:14:06Z",
+        "price": 338.5899963378906
+      },
+      "regular_end_epoch": 1790020800,
+      "source": "https://query1.finance.yahoo.com/v8/finance/chart/AAPL?interval=1m&range=1d&includePrePost=false"
+    },
+    "NVDA": {
+      "execution_reference": {
+        "ts": "2026-09-21T16:12:00Z",
+        "price": 225.21499633789062
+      },
+      "mark": {
+        "ts": "2026-09-21T16:14:06Z",
+        "price": 225.3094940185547
+      },
+      "regular_end_epoch": 1790020800,
+      "source": "https://query1.finance.yahoo.com/v8/finance/chart/NVDA?interval=1m&range=1d&includePrePost=false"
+    },
+    "AMZN": {
+      "execution_reference": {
+        "ts": "2026-09-21T16:12:00Z",
+        "price": 256.5249938964844
+      },
+      "mark": {
+        "ts": "2026-09-21T16:14:06Z",
+        "price": 256.5199890136719
+      },
+      "regular_end_epoch": 1790020800,
+      "source": "https://query1.finance.yahoo.com/v8/finance/chart/AMZN?interval=1m&range=1d&includePrePost=false"
+    },
+    "META": {
+      "execution_reference": {
+        "ts": "2026-09-21T16:12:00Z",
+        "price": 725.39990234375
+      },
+      "mark": {
+        "ts": "2026-09-21T16:14:06Z",
+        "price": 724.0601196289062
+      },
+      "regular_end_epoch": 1790020800,
+      "source": "https://query1.finance.yahoo.com/v8/finance/chart/META?interval=1m&range=1d&includePrePost=false"
+    }
+  },
+  "accounts": {
+    "jev": {
+      "name": "Jev",
+      "model_id": "typesafe/jev-1.13",
+      "cash_usd": 10000.0,
+      "holdings_usd": 0.0,
+      "equity_usd": 10000.0,
+      "pnl_usd": 0.0,
+      "return_pct": 0.0,
+      "orders": [
+        {
+          "ticker": "AAPL",
+          "action": "ABSTAIN",
+          "status": "NO_ORDER"
+        },
+        {
+          "ticker": "NVDA",
+          "action": "ABSTAIN",
+          "status": "NO_ORDER"
+        },
+        {
+          "ticker": "AMZN",
+          "action": "ABSTAIN",
+          "status": "NO_ORDER"
+        },
+        {
+          "ticker": "META",
+          "action": "ABSTAIN",
+          "status": "NO_ORDER"
+        }
+      ],
+      "positions": {},
+      "ai_cost_usd": 0.000127848,
+      "decision_latency_ms": 523
+    },
+    "deepseek": {
+      "name": "DeepSeek",
+      "model_id": "deepseek/deepseek-v4.1-flash",
+      "cash_usd": 8000.0,
+      "holdings_usd": 1997.5738444398708,
+      "equity_usd": 9997.57384443987,
+      "pnl_usd": -2.4261555601297005,
+      "return_pct": -0.0242615556013015,
+      "orders": [
+        {
+          "ticker": "AAPL",
+          "action": "ABSTAIN",
+          "status": "NO_ORDER"
+        },
+        {
+          "ticker": "NVDA",
+          "action": "ADD",
+          "status": "FILLED",
+          "reference_price": 225.21499633789062,
+          "fill_price": 225.32760383605955,
+          "slippage_bps": 5,
+          "notional_usd": 1000.0,
+          "qty": 4.437982666018873
+        },
+        {
+          "ticker": "AMZN",
+          "action": "ABSTAIN",
+          "status": "NO_ORDER"
+        },
+        {
+          "ticker": "META",
+          "action": "ADD",
+          "status": "FILLED",
+          "reference_price": 725.39990234375,
+          "fill_price": 725.7626022949219,
+          "slippage_bps": 5,
+          "notional_usd": 1000.0,
+          "qty": 1.3778610207220883
+        }
+      ],
+      "positions": {
+        "NVDA": {
+          "qty": 4.437982666018873,
+          "mark_price": 225.3094940185547,
+          "market_value": 999.9196289438286
+        },
+        "META": {
+          "qty": 1.3778610207220883,
+          "mark_price": 724.0601196289062,
+          "market_value": 997.6542154960421
+        }
+      },
+      "ai_cost_usd": 0.00084056,
+      "decision_latency_ms": 29437
+    },
+    "quant": {
+      "name": "Quant",
+      "model_id": "season0-gap-rule-v1",
+      "cash_usd": 9000.0,
+      "holdings_usd": 997.6542154960421,
+      "equity_usd": 9997.654215496043,
+      "pnl_usd": -2.345784503957475,
+      "return_pct": -0.023457845039576153,
+      "orders": [
+        {
+          "ticker": "AAPL",
+          "action": "HOLD",
+          "status": "NO_ORDER"
+        },
+        {
+          "ticker": "NVDA",
+          "action": "HOLD",
+          "status": "NO_ORDER"
+        },
+        {
+          "ticker": "AMZN",
+          "action": "HOLD",
+          "status": "NO_ORDER"
+        },
+        {
+          "ticker": "META",
+          "action": "ADD",
+          "status": "FILLED",
+          "reference_price": 725.39990234375,
+          "fill_price": 725.7626022949219,
+          "slippage_bps": 5,
+          "notional_usd": 1000.0,
+          "qty": 1.3778610207220883
+        }
+      ],
+      "positions": {
+        "META": {
+          "qty": 1.3778610207220883,
+          "mark_price": 724.0601196289062,
+          "market_value": 997.6542154960421
+        }
+      },
+      "ai_cost_usd": 0.0,
+      "decision_latency_ms": 0
+    },
+    "astra": {
+      "name": "Astra",
+      "model_id": "openai/gpt-6-astra",
+      "status": "NO_SHOW",
+      "cash_usd": 10000.0,
+      "holdings_usd": 0.0,
+      "equity_usd": 10000.0,
+      "pnl_usd": 0.0,
+      "return_pct": 0.0,
+      "orders": [],
+      "positions": {},
+      "error": "HTTPError: HTTP Error 402: Payment Required"
+    },
+    "hybrid": {
+      "name": "Astra + Jev",
+      "model_id": "openai/gpt-6-astra+typesafe/jev-1.13",
+      "status": "NO_SHOW",
+      "cash_usd": 10000.0,
+      "holdings_usd": 0.0,
+      "equity_usd": 10000.0,
+      "pnl_usd": 0.0,
+      "return_pct": 0.0,
+      "orders": [],
+      "positions": {},
+      "error": "HTTPError: HTTP Error 402: Payment Required"
+    }
+  }
+}

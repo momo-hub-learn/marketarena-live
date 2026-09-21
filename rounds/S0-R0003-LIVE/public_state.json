@@ -2,7 +2,7 @@
   "schema": "marketarena.public-round.v2",
   "round_id": "S0-R0003-LIVE",
   "truth_class": "paper-live",
-  "phase": "REVEALED",
+  "phase": "TRADING",
   "packet_digest": "aa2b1b8e8e6c76f95034be6290b56bf4c755c4243bb3831937cacb70bd5f3f46",
   "packet_frozen_at": "2026-09-21T16:09:42.187422Z",
   "decision_deadline": "2026-09-21T16:15:42.187422Z",
@@ -41,5 +41,6 @@
     }
   },
   "event_chain_valid": true,
-  "updated_at": "2026-09-21T16:11:45.218849Z"
+  "updated_at": "2026-09-21T16:14:08.137354Z",
+  "settlement_status": "INTRADAY"
 }
