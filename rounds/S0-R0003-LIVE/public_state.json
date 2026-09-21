@@ -2,39 +2,44 @@
   "schema": "marketarena.public-round.v2",
   "round_id": "S0-R0003-LIVE",
   "truth_class": "paper-live",
-  "phase": "FROZEN",
+  "phase": "SEALED",
   "packet_digest": "aa2b1b8e8e6c76f95034be6290b56bf4c755c4243bb3831937cacb70bd5f3f46",
   "packet_frozen_at": "2026-09-21T16:09:42.187422Z",
   "decision_deadline": "2026-09-21T16:15:42.187422Z",
   "reveal_pause_seconds": 90,
-  "reveal_at": null,
+  "reveal_at": "2026-09-21T16:11:45.217986Z",
   "contestants": {
     "astra": {
       "name": "Astra",
       "model_id": "openai/gpt-6-astra",
-      "status": "WAITING"
+      "status": "NO_SHOW",
+      "error": "HTTPError: HTTP Error 402: Payment Required"
     },
     "jev": {
       "name": "Jev",
       "model_id": "typesafe/jev-1.13",
-      "status": "WAITING"
+      "status": "LOCKED",
+      "commitment": "aca3c43234b46abafa0d18440f6a1df140f104505dd9ed38635746c5ece14574"
     },
     "deepseek": {
       "name": "DeepSeek",
       "model_id": "deepseek/deepseek-v4.1-flash",
-      "status": "WAITING"
+      "status": "LOCKED",
+      "commitment": "bb8a8e7cf0c302a0e87fd958981b7b83b319fe552aa453b060bec4ca7b00017a"
     },
     "quant": {
       "name": "Quant",
       "model_id": "season0-gap-rule-v1",
-      "status": "WAITING"
+      "status": "LOCKED",
+      "commitment": "b228eab50648f7f9d8e5fd82899758813f520c9e4b863d7cc5904501740d4c7f"
     },
     "hybrid": {
       "name": "Astra + Jev",
       "model_id": "openai/gpt-6-astra+typesafe/jev-1.13",
-      "status": "WAITING"
+      "status": "NO_SHOW",
+      "error": "HTTPError: HTTP Error 402: Payment Required"
     }
   },
   "event_chain_valid": true,
-  "updated_at": "2026-09-21T16:09:44.354436Z"
+  "updated_at": "2026-09-21T16:10:15.218635Z"
 }
