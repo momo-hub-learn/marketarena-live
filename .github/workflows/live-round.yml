@@ -1,0 +1,105 @@
+name: Run paper-live round
+
+on:
+  workflow_dispatch:
+    inputs:
+      round_id:
+        description: Round ID
+        required: true
+        default: S0-R0002-LIVE
+      decision_window_seconds:
+        description: Maximum decision window
+        required: true
+        default: "300"
+      reveal_pause_seconds:
+        description: Public sealed pause before reveal
+        required: true
+        default: "120"
+  push:
+    paths:
+      - rounds/START.json
+
+permissions:
+  contents: write
+
+concurrency:
+  group: marketarena-live-round
+  cancel-in-progress: false
+
+jobs:
+  live-round:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Resolve round settings
+        id: cfg
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "round_id=${{ inputs.round_id }}" >> "$GITHUB_OUTPUT"
+            echo "decision_window=${{ inputs.decision_window_seconds }}" >> "$GITHUB_OUTPUT"
+            echo "reveal_pause=${{ inputs.reveal_pause_seconds }}" >> "$GITHUB_OUTPUT"
+          else
+            python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          c=json.load(open('rounds/START.json'))
+          print('round_id='+c.get('round_id','S0-R0002-LIVE'))
+          print('decision_window='+str(c.get('decision_window_seconds',300)))
+          print('reveal_pause='+str(c.get('reveal_pause_seconds',120)))
+          PY
+          fi
+
+      - name: Check OpenRouter secret
+        shell: bash
+        run: |
+          test -n "$OPENROUTER_API_KEY" || (echo 'OPENROUTER_API_KEY is missing' >&2; exit 1)
+
+      - name: Freeze fresh market packet
+        run: |
+          python scripts/live_round.py prepare             --round-id "${{ steps.cfg.outputs.round_id }}"             --decision-window "${{ steps.cfg.outputs.decision_window }}"             --reveal-pause "${{ steps.cfg.outputs.reveal_pause }}"
+
+      - name: Publish frozen packet
+        shell: bash
+        run: |
+          git config user.name "MarketArena Bot"
+          git config user.email "marketarena-bot@users.noreply.github.com"
+          git add rounds .gitignore
+          git commit -m "Freeze ${{ steps.cfg.outputs.round_id }} market packet"
+          git push
+
+      - name: Collect and seal five contestants
+        run: |
+          python scripts/live_round.py decide             --round-id "${{ steps.cfg.outputs.round_id }}"             --reveal-pause "${{ steps.cfg.outputs.reveal_pause }}"
+
+      - name: Publish commitments
+        shell: bash
+        run: |
+          git add rounds
+          git commit -m "Seal ${{ steps.cfg.outputs.round_id }} decisions"
+          git push
+
+      - name: Reveal after sealed pause
+        run: python scripts/live_round.py reveal --round-id "${{ steps.cfg.outputs.round_id }}"
+
+      - name: Verify audit chain
+        run: python scripts/live_round.py verify-events --round-id "${{ steps.cfg.outputs.round_id }}"
+
+      - name: Publish reveal
+        shell: bash
+        run: |
+          git add rounds
+          git commit -m "Reveal ${{ steps.cfg.outputs.round_id }} decisions"
+          git push
