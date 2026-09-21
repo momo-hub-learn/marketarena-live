@@ -2,39 +2,44 @@
   "schema": "marketarena.public-round.v2",
   "round_id": "S0-R0002-LIVE",
   "truth_class": "paper-live",
-  "phase": "FROZEN",
+  "phase": "SEALED",
   "packet_digest": "73575909e874934ac7748317dfddc54046869f6c9dd2ae7a9f6a5ce88a3473ca",
   "packet_frozen_at": "2026-09-21T15:37:14.319289Z",
   "decision_deadline": "2026-09-21T15:42:14.319289Z",
   "reveal_pause_seconds": 120,
-  "reveal_at": null,
+  "reveal_at": "2026-09-21T15:40:05.813883Z",
   "contestants": {
     "astra": {
       "name": "Astra",
       "model_id": "openai/gpt-6-astra",
-      "status": "WAITING"
+      "status": "NO_SHOW",
+      "error": "HTTPError: HTTP Error 402: Payment Required"
     },
     "jev": {
       "name": "Jev",
       "model_id": "typesafe/jev-1.13",
-      "status": "WAITING"
+      "status": "NO_SHOW",
+      "error": "URLError: <urlopen error [Errno 104] Connection reset by peer>"
     },
     "deepseek": {
       "name": "DeepSeek",
       "model_id": "deepseek/deepseek-v4.1-flash",
-      "status": "WAITING"
+      "status": "NO_SHOW",
+      "error": "TypeError: the JSON object must be str, bytes or bytearray, not NoneType"
     },
     "quant": {
       "name": "Quant",
       "model_id": "season0-gap-rule-v1",
-      "status": "WAITING"
+      "status": "LOCKED",
+      "commitment": "1432b096fad6837edcd9341ac1160dd8caea45a26edebf0b5f31b43d1fde04da"
     },
     "hybrid": {
       "name": "Astra + Jev",
       "model_id": "openai/gpt-6-astra+typesafe/jev-1.13",
-      "status": "WAITING"
+      "status": "NO_SHOW",
+      "error": "HTTPError: HTTP Error 402: Payment Required"
     }
   },
   "event_chain_valid": true,
-  "updated_at": "2026-09-21T15:37:15.944098Z"
+  "updated_at": "2026-09-21T15:38:05.814374Z"
 }
