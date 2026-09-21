@@ -1,0 +1,56 @@
+name: Mark and settle live round
+
+on:
+  workflow_dispatch:
+    inputs:
+      round_id:
+        description: Round ID (blank = current)
+        required: false
+        default: ""
+  push:
+    paths:
+      - rounds/SETTLE.json
+  schedule:
+    - cron: "10 21 * * 1-5"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: marketarena-settlement
+  cancel-in-progress: true
+
+jobs:
+  settle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Resolve round
+        id: cfg
+        shell: bash
+        run: |
+          if [ -n "${{ inputs.round_id }}" ]; then
+            RID="${{ inputs.round_id }}"
+          elif [ -f rounds/SETTLE.json ]; then
+            RID=$(python -c "import json; print(json.load(open('rounds/SETTLE.json')).get('round_id',''))")
+          else
+            RID=$(python -c "import json; print(json.load(open('rounds/current.json'))['round_id'])")
+          fi
+          if [ -z "$RID" ]; then RID=$(python -c "import json; print(json.load(open('rounds/current.json'))['round_id'])"); fi
+          echo "round_id=$RID" >> "$GITHUB_OUTPUT"
+      - name: Mark / settle
+        run: python scripts/settle_round.py --round-id "${{ steps.cfg.outputs.round_id }}"
+      - name: Publish settlement
+        shell: bash
+        run: |
+          git config user.name "MarketArena Bot"
+          git config user.email "marketarena-bot@users.noreply.github.com"
+          git add rounds
+          git diff --cached --quiet && exit 0
+          git commit -m "Mark ${{ steps.cfg.outputs.round_id }} paper portfolio"
+          git push
