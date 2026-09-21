@@ -2,7 +2,7 @@
   "schema": "marketarena.public-round.v2",
   "round_id": "S0-R0003-LIVE",
   "truth_class": "paper-live",
-  "phase": "SEALED",
+  "phase": "REVEALED",
   "packet_digest": "aa2b1b8e8e6c76f95034be6290b56bf4c755c4243bb3831937cacb70bd5f3f46",
   "packet_frozen_at": "2026-09-21T16:09:42.187422Z",
   "decision_deadline": "2026-09-21T16:15:42.187422Z",
@@ -18,19 +18,19 @@
     "jev": {
       "name": "Jev",
       "model_id": "typesafe/jev-1.13",
-      "status": "LOCKED",
+      "status": "REVEALED",
       "commitment": "aca3c43234b46abafa0d18440f6a1df140f104505dd9ed38635746c5ece14574"
     },
     "deepseek": {
       "name": "DeepSeek",
       "model_id": "deepseek/deepseek-v4.1-flash",
-      "status": "LOCKED",
+      "status": "REVEALED",
       "commitment": "bb8a8e7cf0c302a0e87fd958981b7b83b319fe552aa453b060bec4ca7b00017a"
     },
     "quant": {
       "name": "Quant",
       "model_id": "season0-gap-rule-v1",
-      "status": "LOCKED",
+      "status": "REVEALED",
       "commitment": "b228eab50648f7f9d8e5fd82899758813f520c9e4b863d7cc5904501740d4c7f"
     },
     "hybrid": {
@@ -41,5 +41,5 @@
     }
   },
   "event_chain_valid": true,
-  "updated_at": "2026-09-21T16:10:15.218635Z"
+  "updated_at": "2026-09-21T16:11:45.218849Z"
 }

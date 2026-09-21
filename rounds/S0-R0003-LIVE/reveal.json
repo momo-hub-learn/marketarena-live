@@ -1,0 +1,161 @@
+{
+  "schema": "marketarena.reveal.v1",
+  "round_id": "S0-R0003-LIVE",
+  "revealed_at": "2026-09-21T16:11:45.218389Z",
+  "contestants": {
+    "jev": {
+      "bundle": {
+        "model_id": "typesafe/jev-1.13",
+        "latency_ms": 523,
+        "usage": {
+          "input_tokens": 3044,
+          "output_tokens": 226,
+          "cost": 0.000127848
+        },
+        "decisions": {
+          "AAPL": {
+            "action": "ABSTAIN",
+            "confidence": 0.89,
+            "reason": "Structured Jev decision from the frozen packet.",
+            "probabilities": {
+              "ADD": 0.06,
+              "EXIT": 0,
+              "REDUCE": 0,
+              "ABSTAIN": 0.91,
+              "HOLD": 0.03
+            }
+          },
+          "NVDA": {
+            "action": "ABSTAIN",
+            "confidence": 0.85,
+            "reason": "Structured Jev decision from the frozen packet.",
+            "probabilities": {
+              "ADD": 0.09,
+              "EXIT": 0,
+              "REDUCE": 0,
+              "ABSTAIN": 0.89,
+              "HOLD": 0.02
+            }
+          },
+          "AMZN": {
+            "action": "ABSTAIN",
+            "confidence": 0.73,
+            "reason": "Structured Jev decision from the frozen packet.",
+            "probabilities": {
+              "ADD": 0.18,
+              "EXIT": 0,
+              "REDUCE": 0,
+              "ABSTAIN": 0.79,
+              "HOLD": 0.03
+            }
+          },
+          "META": {
+            "action": "ABSTAIN",
+            "confidence": 0.64,
+            "reason": "Structured Jev decision from the frozen packet.",
+            "probabilities": {
+              "ADD": 0.28,
+              "EXIT": 0,
+              "REDUCE": 0,
+              "ABSTAIN": 0.71,
+              "HOLD": 0.01
+            }
+          }
+        },
+        "extra": {
+          "jev_raw_model": "typesafe/jev-1.13-20260917"
+        }
+      },
+      "nonce": "d727f80bc2836b79ed1885f42c6fe402f87d4eea42d76e235af6f85647501778",
+      "commitment": "aca3c43234b46abafa0d18440f6a1df140f104505dd9ed38635746c5ece14574"
+    },
+    "deepseek": {
+      "bundle": {
+        "model_id": "deepseek/deepseek-v4.1-flash",
+        "latency_ms": 29437,
+        "usage": {
+          "prompt_tokens": 2410,
+          "completion_tokens": 1198,
+          "total_tokens": 3608,
+          "cost": 0.00084056,
+          "is_byok": false,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "audio_tokens": 0,
+            "video_tokens": 0
+          },
+          "cost_details": {
+            "upstream_inference_cost": 0.00084056,
+            "upstream_inference_prompt_cost": 0.0003374,
+            "upstream_inference_completions_cost": 0.00050316
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 927,
+            "image_tokens": 0,
+            "audio_tokens": 0
+          }
+        },
+        "decisions": {
+          "AAPL": {
+            "action": "ABSTAIN",
+            "confidence": 0.5,
+            "reason": "No ticker-specific catalyst; news flow references AMD/MSFT/rare earths. Mild +0.67% move near day highs but no edge, so stay flat."
+          },
+          "NVDA": {
+            "action": "ADD",
+            "confidence": 0.6,
+            "reason": "Semis broadly bid (SOXL pop, Intel comeback chatter) and NVDA +1.25% on heavy volume. Initiate starter on sector tailwind; leadership intact."
+          },
+          "AMZN": {
+            "action": "ABSTAIN",
+            "confidence": 0.5,
+            "reason": "Up 1.14% but catalyst (blocking Meta's Muse from marketplace) is competitively ambiguous. No clear directional edge; wait for cleaner signal."
+          },
+          "META": {
+            "action": "ADD",
+            "confidence": 0.55,
+            "reason": "Strongest momentum (+8.7%) with a concrete Muse catalyst driving outsized volume. Initiate small on leadership, but pop is extended so keep confidence modest."
+          }
+        }
+      },
+      "nonce": "a79e1a20689b72de5878a335e68cf1dccbf6f1a54eba2ef3451321ab4d929109",
+      "commitment": "bb8a8e7cf0c302a0e87fd958981b7b83b319fe552aa453b060bec4ca7b00017a"
+    },
+    "quant": {
+      "bundle": {
+        "model_id": "season0-gap-rule-v1",
+        "latency_ms": 0,
+        "usage": {},
+        "decisions": {
+          "AAPL": {
+            "action": "HOLD",
+            "confidence": 1.0,
+            "reason": "Change 0.67% is inside the frozen +/-1.5% band."
+          },
+          "NVDA": {
+            "action": "HOLD",
+            "confidence": 1.0,
+            "reason": "Change 1.25% is inside the frozen +/-1.5% band."
+          },
+          "AMZN": {
+            "action": "HOLD",
+            "confidence": 1.0,
+            "reason": "Change 1.14% is inside the frozen +/-1.5% band."
+          },
+          "META": {
+            "action": "ADD",
+            "confidence": 1.0,
+            "reason": "Frozen price is 8.68% above previous close (>= +1.5%)."
+          }
+        }
+      },
+      "nonce": "6f36c56341fe777aa09a7b1efbc63973bf032a1e48b3a1774a7adc3b6c06f71b",
+      "commitment": "b228eab50648f7f9d8e5fd82899758813f520c9e4b863d7cc5904501740d4c7f"
+    }
+  },
+  "no_shows": {
+    "astra": "HTTPError: HTTP Error 402: Payment Required",
+    "hybrid": "HTTPError: HTTP Error 402: Payment Required"
+  }
+}
