@@ -1,0 +1,6 @@
+{
+  "round_id": "S0-R0002-LIVE",
+  "decision_window_seconds": 300,
+  "reveal_pause_seconds": 120,
+  "note": "First live round using the single OpenRouter key."
+}
