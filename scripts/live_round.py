@@ -197,19 +197,31 @@ def openrouter_key() -> str:
 
 def openrouter(path: str, body: dict[str, Any], *, timeout=120) -> tuple[dict[str, Any], int]:
     started = time.monotonic()
-    data = http_json(
-        OPENROUTER + path,
-        method="POST",
-        headers={
-            "Authorization": f"Bearer {openrouter_key()}",
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://github.com/momo-hub-learn/marketarena-live",
-            "X-Title": "MarketArena",
-        },
-        body=body,
-        timeout=timeout,
-    )
-    return data, int((time.monotonic() - started) * 1000)
+    attempts = 3 if path.endswith("/decisions") else 2
+    last = None
+    for attempt in range(attempts):
+        try:
+            data = http_json(
+                OPENROUTER + path,
+                method="POST",
+                headers={
+                    "Authorization": f"Bearer {openrouter_key()}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://github.com/momo-hub-learn/marketarena-live",
+                    "X-Title": "MarketArena",
+                },
+                body=body,
+                timeout=timeout,
+            )
+            return data, int((time.monotonic() - started) * 1000)
+        except Exception as e:
+            last = e
+            # Billing/auth/configuration failures are deterministic; transport failures are not.
+            if any(code in str(e) for code in ("HTTP Error 400", "HTTP Error 401", "HTTP Error 402", "HTTP Error 403")):
+                raise
+            if attempt + 1 < attempts:
+                time.sleep(1.5 * (attempt + 1))
+    raise last
 
 def decision_schema() -> dict[str, Any]:
     per = {
@@ -270,17 +282,39 @@ def llm_decisions(model: str, packet: dict[str, Any], system: str) -> dict[str, 
             },
             {"role": "user", "content": market_prompt(packet)},
         ],
-        "response_format": {
-            "type": "json_schema",
-            "json_schema": {"name": "marketarena_trade_decisions", "strict": True, "schema": decision_schema()},
-        },
         "max_tokens": 1200,
     }
+    if model == DEEPSEEK_MODEL:
+        # Tool calling is broadly routed for V4.1 Flash and avoids providers that
+        # return null content for response_format-based structured output.
+        body["tools"] = [{
+            "type": "function",
+            "function": {
+                "name": "submit_decisions",
+                "description": "Submit the complete MarketArena paper-trading action vector.",
+                "parameters": decision_schema(),
+            },
+        }]
+        body["tool_choice"] = {"type": "function", "function": {"name": "submit_decisions"}}
+    else:
+        body["response_format"] = {
+            "type": "json_schema",
+            "json_schema": {"name": "marketarena_trade_decisions", "strict": True, "schema": decision_schema()},
+        }
     if model == ASTRA_MODEL:
         body["reasoning"] = {"effort": "medium"}
     data, latency = openrouter("/api/v1/chat/completions", body)
-    content = data["choices"][0]["message"]["content"]
-    parsed = json.loads(content)
+    message = data["choices"][0]["message"]
+    if model == DEEPSEEK_MODEL:
+        calls = message.get("tool_calls") or []
+        if not calls:
+            raise ValueError(f"DeepSeek returned no submit_decisions tool call: {message!r}")
+        parsed = json.loads(calls[0]["function"]["arguments"])
+    else:
+        content = message.get("content")
+        if not content:
+            raise ValueError(f"{model} returned empty structured content: {message!r}")
+        parsed = json.loads(content)
     return normalize_bundle(parsed["decisions"], model, latency, data.get("usage"))
 
 def jev_decisions(packet: dict[str, Any], *, extra_state=None, model_id=JEV_MODEL) -> dict[str, Any]:
