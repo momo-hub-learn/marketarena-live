@@ -2,7 +2,7 @@
   "schema": "marketarena.public-round.v2",
   "round_id": "S0-R0002-LIVE",
   "truth_class": "paper-live",
-  "phase": "SEALED",
+  "phase": "REVEALED",
   "packet_digest": "73575909e874934ac7748317dfddc54046869f6c9dd2ae7a9f6a5ce88a3473ca",
   "packet_frozen_at": "2026-09-21T15:37:14.319289Z",
   "decision_deadline": "2026-09-21T15:42:14.319289Z",
@@ -30,7 +30,7 @@
     "quant": {
       "name": "Quant",
       "model_id": "season0-gap-rule-v1",
-      "status": "LOCKED",
+      "status": "REVEALED",
       "commitment": "1432b096fad6837edcd9341ac1160dd8caea45a26edebf0b5f31b43d1fde04da"
     },
     "hybrid": {
@@ -41,5 +41,5 @@
     }
   },
   "event_chain_valid": true,
-  "updated_at": "2026-09-21T15:38:05.814374Z"
+  "updated_at": "2026-09-21T15:40:05.814546Z"
 }

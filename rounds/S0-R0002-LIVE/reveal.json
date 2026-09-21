@@ -1,0 +1,44 @@
+{
+  "schema": "marketarena.reveal.v1",
+  "round_id": "S0-R0002-LIVE",
+  "revealed_at": "2026-09-21T15:40:05.814181Z",
+  "contestants": {
+    "quant": {
+      "bundle": {
+        "model_id": "season0-gap-rule-v1",
+        "latency_ms": 0,
+        "usage": {},
+        "decisions": {
+          "AAPL": {
+            "action": "HOLD",
+            "confidence": 1.0,
+            "reason": "Change 0.35% is inside the frozen +/-1.5% band."
+          },
+          "NVDA": {
+            "action": "HOLD",
+            "confidence": 1.0,
+            "reason": "Change 1.36% is inside the frozen +/-1.5% band."
+          },
+          "AMZN": {
+            "action": "HOLD",
+            "confidence": 1.0,
+            "reason": "Change 0.65% is inside the frozen +/-1.5% band."
+          },
+          "META": {
+            "action": "ADD",
+            "confidence": 1.0,
+            "reason": "Frozen price is 7.60% above previous close (>= +1.5%)."
+          }
+        }
+      },
+      "nonce": "2899a16e481c066f54eb06b81dc8ab9d904ff4ec4107c2625c36553ad1ea0719",
+      "commitment": "1432b096fad6837edcd9341ac1160dd8caea45a26edebf0b5f31b43d1fde04da"
+    }
+  },
+  "no_shows": {
+    "jev": "URLError: <urlopen error [Errno 104] Connection reset by peer>",
+    "hybrid": "HTTPError: HTTP Error 402: Payment Required",
+    "astra": "HTTPError: HTTP Error 402: Payment Required",
+    "deepseek": "TypeError: the JSON object must be str, bytes or bytearray, not NoneType"
+  }
+}
