@@ -1,0 +1,18 @@
+{
+  "schema":"marketarena.public-round.v1",
+  "round_id":"S0-R0001-OPENING-BELL-LIVE",
+  "truth_class":"paper-live",
+  "packet_digest":"69ed1ffc4cae405af6ce6daa025577cdb367328627421c79c94dada517a99db8",
+  "packet_cutoff":"2026-09-21T08:25:00-04:00",
+  "decision_cutoff":"2026-09-21T09:20:00-04:00",
+  "execution_time":"2026-09-21T09:30:00-04:00",
+  "phase":"DECIDING",
+  "contestants":{
+    "astra":{"status":"WAITING_CREDENTIALS"},
+    "jev":{"status":"WAITING_CREDENTIALS"},
+    "deepseek":{"status":"WAITING_CREDENTIALS"},
+    "quant":{"status":"LOCKED","commitment":"771db62a0c083491fc7b1ef5fe80839b4ba3f11154e6df8372867fa87054ad0a","model_id":"season0-gap-rule-v1"},
+    "hybrid":{"status":"WAITING_CREDENTIALS"}
+  },
+  "event_chain_valid":true
+}
