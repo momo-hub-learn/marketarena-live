@@ -515,6 +515,16 @@ def verify_commitment(bundle: dict[str, Any], nonce: str, expected: str) -> bool
     return secrets.compare_digest(commitment(bundle, nonce), expected)
 
 def prepare(args) -> None:
+    current_path = ROOT / "rounds" / "current.json"
+    if current_path.exists():
+        current = read_json(current_path)
+        state_path = ROOT / current.get("path", "")
+        if state_path.exists():
+            current_state = read_json(state_path)
+            if current_state.get("phase") not in ("SETTLED",):
+                raise RuntimeError(
+                    f"cannot start {args.round_id}: current round {current.get('round_id')} is still {current_state.get('phase')}"
+                )
     round_dir = ROOT / "rounds" / args.round_id
     if round_dir.exists() and (round_dir / "packet.json").exists():
         raise RuntimeError(f"round already exists: {args.round_id}")
