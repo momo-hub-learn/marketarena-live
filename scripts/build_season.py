@@ -6,6 +6,7 @@ from collections import Counter
 
 ROOT=Path(__file__).resolve().parents[1]
 IDS=["astra","jev","deepseek","quant","hybrid"]
+NAMES={"astra":"Astra","jev":"Jev","deepseek":"DeepSeek","quant":"Quant","hybrid":"Astra + Jev"}
 
 def readj(p):
     return json.loads(Path(p).read_text(encoding="utf-8"))
@@ -24,13 +25,15 @@ def main():
     dirs=sorted([p for p in (ROOT/"rounds").iterdir() if p.is_dir() and (p/"public_state.json").exists()])
     for rd in dirs:
         state=readj(rd/"public_state.json")
+        if not state.get("packet_frozen_at"):
+            continue
         reveal=readj(rd/"reveal.json") if (rd/"reveal.json").exists() else {"contestants":{},"no_shows":{}}
         settle=readj(rd/"settlement.json") if (rd/"settlement.json").exists() else None
         row={"round_id":state["round_id"],"phase":state.get("phase"),"packet_frozen_at":state.get("packet_frozen_at"),"accounts":{}}
         for cid in IDS:
             cstate=(state.get("contestants") or {}).get(cid) or {}
             s=stats[cid]
-            s["name"]=s["name"] or cstate.get("name") or cid
+            s["name"]=NAMES[cid]
             s["model_id"]=s["model_id"] or cstate.get("model_id")
             if cstate.get("status")=="NO_SHOW" or cid in (reveal.get("no_shows") or {}):
                 s["no_shows"]+=1
