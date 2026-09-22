@@ -1,10 +1,10 @@
 {
   "schema": "marketarena.settlement.v1",
   "round_id": "S0-R0003-LIVE",
-  "status": "INTRADAY",
+  "status": "SETTLED",
   "execution_rule": "First regular-session 1m bar at/after the first whole minute following reveal; ADD receives 5 bps adverse paper slippage.",
   "mark_rule": "Latest available regular-session 1m close; becomes final after regular market end.",
-  "generated_at": "2026-09-21T16:14:08.136813Z",
+  "generated_at": "2026-09-22T00:05:10.349831Z",
   "market": {
     "AAPL": {
       "execution_reference": {
@@ -12,8 +12,8 @@
         "price": 338.6400146484375
       },
       "mark": {
-        "ts": "2026-09-21T16:14:06Z",
-        "price": 338.5899963378906
+        "ts": "2026-09-21T19:59:00Z",
+        "price": 338.8900146484375
       },
       "regular_end_epoch": 1790020800,
       "source": "https://query1.finance.yahoo.com/v8/finance/chart/AAPL?interval=1m&range=1d&includePrePost=false"
@@ -24,8 +24,8 @@
         "price": 225.21499633789062
       },
       "mark": {
-        "ts": "2026-09-21T16:14:06Z",
-        "price": 225.3094940185547
+        "ts": "2026-09-21T19:59:00Z",
+        "price": 227.25
       },
       "regular_end_epoch": 1790020800,
       "source": "https://query1.finance.yahoo.com/v8/finance/chart/NVDA?interval=1m&range=1d&includePrePost=false"
@@ -36,8 +36,8 @@
         "price": 256.5249938964844
       },
       "mark": {
-        "ts": "2026-09-21T16:14:06Z",
-        "price": 256.5199890136719
+        "ts": "2026-09-21T19:59:00Z",
+        "price": 258.42999267578125
       },
       "regular_end_epoch": 1790020800,
       "source": "https://query1.finance.yahoo.com/v8/finance/chart/AMZN?interval=1m&range=1d&includePrePost=false"
@@ -48,8 +48,8 @@
         "price": 725.39990234375
       },
       "mark": {
-        "ts": "2026-09-21T16:14:06Z",
-        "price": 724.0601196289062
+        "ts": "2026-09-21T19:59:00Z",
+        "price": 741.1300048828125
       },
       "regular_end_epoch": 1790020800,
       "source": "https://query1.finance.yahoo.com/v8/finance/chart/META?interval=1m&range=1d&includePrePost=false"
@@ -94,10 +94,10 @@
       "name": "DeepSeek",
       "model_id": "deepseek/deepseek-v4.1-flash",
       "cash_usd": 8000.0,
-      "holdings_usd": 1997.5738444398708,
-      "equity_usd": 9997.57384443987,
-      "pnl_usd": -2.4261555601297005,
-      "return_pct": -0.0242615556013015,
+      "holdings_usd": 2029.7057058683872,
+      "equity_usd": 10029.705705868388,
+      "pnl_usd": 29.705705868387668,
+      "return_pct": 0.29705705868388055,
       "orders": [
         {
           "ticker": "AAPL",
@@ -133,13 +133,13 @@
       "positions": {
         "NVDA": {
           "qty": 4.437982666018873,
-          "mark_price": 225.3094940185547,
-          "market_value": 999.9196289438286
+          "mark_price": 227.25,
+          "market_value": 1008.5315608527889
         },
         "META": {
           "qty": 1.3778610207220883,
-          "mark_price": 724.0601196289062,
-          "market_value": 997.6542154960421
+          "mark_price": 741.1300048828125,
+          "market_value": 1021.1741450155982
         }
       },
       "ai_cost_usd": 0.00084056,
@@ -149,10 +149,10 @@
       "name": "Quant",
       "model_id": "season0-gap-rule-v1",
       "cash_usd": 9000.0,
-      "holdings_usd": 997.6542154960421,
-      "equity_usd": 9997.654215496043,
-      "pnl_usd": -2.345784503957475,
-      "return_pct": -0.023457845039576153,
+      "holdings_usd": 1021.1741450155982,
+      "equity_usd": 10021.174145015599,
+      "pnl_usd": 21.174145015598697,
+      "return_pct": 0.2117414501559889,
       "orders": [
         {
           "ticker": "AAPL",
@@ -183,8 +183,8 @@
       "positions": {
         "META": {
           "qty": 1.3778610207220883,
-          "mark_price": 724.0601196289062,
-          "market_value": 997.6542154960421
+          "mark_price": 741.1300048828125,
+          "market_value": 1021.1741450155982
         }
       },
       "ai_cost_usd": 0.0,
