@@ -1,0 +1,74 @@
+{
+  "schema": "marketarena.season-accounts.v1",
+  "season": "Season 0 — Fast & Slow",
+  "starting_capital_usd": 10000.0,
+  "mode": "persistent",
+  "migration": {
+    "policy": "Persistent accounts begin from the audited closing state of S0-R0003-LIVE. Earlier experimental rounds are preserved but are not retroactively converted into positions.",
+    "source_round": "S0-R0003-LIVE",
+    "as_of": "2026-09-21T19:59:00Z"
+  },
+  "updated_from_packet_frozen_at": "2026-09-21T16:09:42.187422Z",
+  "accounts": {
+    "astra": {
+      "name": "Astra",
+      "cash_usd": 10000.0,
+      "equity_usd": 10000.0,
+      "realized_pnl_usd": 0.0,
+      "positions": {},
+      "source_round": "S0-R0003-LIVE"
+    },
+    "jev": {
+      "name": "Jev",
+      "cash_usd": 10000.0,
+      "equity_usd": 10000.0,
+      "realized_pnl_usd": 0.0,
+      "positions": {},
+      "source_round": "S0-R0003-LIVE"
+    },
+    "deepseek": {
+      "name": "DeepSeek",
+      "cash_usd": 8000.0,
+      "equity_usd": 10029.705705868388,
+      "realized_pnl_usd": 0.0,
+      "positions": {
+        "NVDA": {
+          "qty": 4.437982666018873,
+          "avg_cost": 225.32760383605955,
+          "mark_price": 227.25,
+          "market_value": 1008.5315608527889
+        },
+        "META": {
+          "qty": 1.3778610207220883,
+          "avg_cost": 725.7626022949219,
+          "mark_price": 741.1300048828125,
+          "market_value": 1021.1741450155982
+        }
+      },
+      "source_round": "S0-R0003-LIVE"
+    },
+    "quant": {
+      "name": "Quant",
+      "cash_usd": 9000.0,
+      "equity_usd": 10021.174145015599,
+      "realized_pnl_usd": 0.0,
+      "positions": {
+        "META": {
+          "qty": 1.3778610207220883,
+          "avg_cost": 725.7626022949219,
+          "mark_price": 741.1300048828125,
+          "market_value": 1021.1741450155982
+        }
+      },
+      "source_round": "S0-R0003-LIVE"
+    },
+    "hybrid": {
+      "name": "Astra + Jev",
+      "cash_usd": 10000.0,
+      "equity_usd": 10000.0,
+      "realized_pnl_usd": 0.0,
+      "positions": {},
+      "source_round": "S0-R0003-LIVE"
+    }
+  }
+}
