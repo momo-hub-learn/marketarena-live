@@ -20,6 +20,7 @@ on:
       - rounds/START.json
   schedule:
     - cron: "20 13 * * 1-5"
+    - cron: "20 14 * * 1-5"
 
 permissions:
   contents: write
@@ -59,11 +60,13 @@ jobs:
           print("round_id=S0-"+now.strftime("%Y%m%d")+"-OPENING")
           print("decision_window=360")
           print("reveal_pause=90")
+          print("market_window="+("true" if now.hour==9 else "false"))
           PY
           elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "round_id=${{ inputs.round_id }}" >> "$GITHUB_OUTPUT"
             echo "decision_window=${{ inputs.decision_window_seconds }}" >> "$GITHUB_OUTPUT"
             echo "reveal_pause=${{ inputs.reveal_pause_seconds }}" >> "$GITHUB_OUTPUT"
+            echo "market_window=true" >> "$GITHUB_OUTPUT"
           else
             python - <<'PY' >> "$GITHUB_OUTPUT"
           import json
@@ -71,6 +74,7 @@ jobs:
           print('round_id='+c.get('round_id','S0-MANUAL-LIVE'))
           print('decision_window='+str(c.get('decision_window_seconds',360)))
           print('reveal_pause='+str(c.get('reveal_pause_seconds',90)))
+          print('market_window=true')
           PY
           fi
 
@@ -78,8 +82,12 @@ jobs:
         id: duplicate
         shell: bash
         run: |
-          if [ -f "rounds/${{ steps.cfg.outputs.round_id }}/public_state.json" ]; then
+          if [ "${{ steps.cfg.outputs.market_window }}" != "true" ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "reason=outside 09:xx New York opening window" >> "$GITHUB_OUTPUT"
+          elif [ -f "rounds/${{ steps.cfg.outputs.round_id }}/public_state.json" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "reason=round already exists" >> "$GITHUB_OUTPUT"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
