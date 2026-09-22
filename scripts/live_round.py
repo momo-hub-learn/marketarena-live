@@ -18,6 +18,8 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 ACTIONS = ["ADD", "HOLD", "REDUCE", "EXIT", "ABSTAIN"]
 TICKERS = ["AAPL", "NVDA", "AMZN", "META"]
+IDS = ["astra", "jev", "deepseek", "quant", "hybrid"]
+SEASON_ACCOUNTS = ROOT / "season" / "season0_accounts.json"
 OPENROUTER = "https://openrouter.ai"
 ASTRA_MODEL = "openai/gpt-6-astra"
 JEV_MODEL = "typesafe/jev-1.13"
@@ -44,6 +46,56 @@ def write_json(path: Path, obj: Any, *, canonical: bool = False) -> None:
         path.write_bytes(canonical_bytes(obj))
     else:
         path.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+def load_season_accounts() -> dict[str, Any]:
+    if not SEASON_ACCOUNTS.exists():
+        raise RuntimeError("Persistent Season 0 account ledger is missing")
+    data = read_json(SEASON_ACCOUNTS)
+    missing = [cid for cid in IDS if cid not in (data.get("accounts") or {})]
+    if missing:
+        raise RuntimeError(f"Season account ledger missing contestants: {missing}")
+    return data
+
+def mark_account_for_packet(account: dict[str, Any], packet: dict[str, Any]) -> dict[str, Any]:
+    cash = float(account.get("cash_usd", 0.0))
+    positions = {}
+    holdings = 0.0
+    for ticker, pos in (account.get("positions") or {}).items():
+        qty = float(pos.get("qty", 0.0))
+        if qty <= 0:
+            continue
+        price = float(packet["quotes"][ticker]["observed_price"])
+        value = qty * price
+        holdings += value
+        positions[ticker] = {
+            "qty": qty,
+            "avg_cost": float(pos.get("avg_cost", price)),
+            "mark_price": price,
+            "market_value": value,
+        }
+    return {
+        "cash_usd": cash,
+        "holdings_usd": holdings,
+        "equity_usd": cash + holdings,
+        "realized_pnl_usd": float(account.get("realized_pnl_usd", 0.0)),
+        "positions": positions,
+        "source_round": account.get("source_round"),
+    }
+
+def freeze_account_snapshot(packet: dict[str, Any]) -> tuple[dict[str, Any], str]:
+    ledger = load_season_accounts()
+    snapshot = {
+        "schema": "marketarena.round-accounts.v1",
+        "season": ledger.get("season"),
+        "round_id": packet["round_id"],
+        "frozen_at": packet["frozen_at"],
+        "persistent": True,
+        "accounts": {
+            cid: mark_account_for_packet(ledger["accounts"][cid], packet)
+            for cid in IDS
+        },
+    }
+    return snapshot, sha256_bytes(canonical_bytes(snapshot))
 
 def http_json(url: str, *, method="GET", headers=None, body=None, timeout=30) -> Any:
     hdr = {"User-Agent": "MarketArena/0.1 (+https://github.com/momo-hub-learn/marketarena-live)"}
@@ -121,14 +173,13 @@ def make_packet(round_id: str) -> tuple[dict[str, Any], bytes, str]:
         quotes[ticker] = yahoo_snapshot(ticker, frozen_at)
         news[ticker] = yahoo_news(ticker, frozen_at)
     packet = {
-        "schema": "marketarena.packet.v3",
+        "schema": "marketarena.packet.v4",
         "round_id": round_id,
         "truth_class": "paper-live",
         "frozen_at": iso(frozen_at),
         "universe": TICKERS,
         "quotes": quotes,
         "news": news,
-        "portfolio": {"cash_usd": 10000.0, "equity_usd": 10000.0, "positions": {}},
         "allowed_actions": ACTIONS,
         "arena_rules": {
             "paper_only": True,
@@ -136,6 +187,7 @@ def make_packet(round_id: str) -> tuple[dict[str, Any], bytes, str]:
             "no_shorting": True,
             "add_size_pct_equity": 10,
             "reduce_size_pct_equity": 10,
+            "persistent_accounts": True,
             "contestants_cannot_see_leaderboard": True,
             "contestants_cannot_see_rival_decisions": True,
         },
@@ -248,8 +300,9 @@ def decision_schema() -> dict[str, Any]:
         "required": ["decisions"],
     }
 
-def market_prompt(packet: dict[str, Any]) -> str:
-    safe = {k: packet[k] for k in ["frozen_at", "universe", "quotes", "news", "portfolio", "allowed_actions", "arena_rules"]}
+def market_prompt(packet: dict[str, Any], portfolio: dict[str, Any]) -> str:
+    safe = {k: packet[k] for k in ["frozen_at", "universe", "quotes", "news", "allowed_actions", "arena_rules"]}
+    safe["portfolio"] = portfolio
     return json.dumps(safe, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 def normalize_bundle(decisions: dict[str, Any], model_id: str, latency_ms: int, usage=None, *, extra=None) -> dict[str, Any]:
@@ -271,7 +324,7 @@ def normalize_bundle(decisions: dict[str, Any], model_id: str, latency_ms: int, 
         result["extra"] = extra
     return result
 
-def llm_decisions(model: str, packet: dict[str, Any], system: str) -> dict[str, Any]:
+def llm_decisions(model: str, packet: dict[str, Any], portfolio: dict[str, Any], system: str) -> dict[str, Any]:
     body = {
         "model": model,
         "messages": [
@@ -280,7 +333,7 @@ def llm_decisions(model: str, packet: dict[str, Any], system: str) -> dict[str, 
                 "content": system
                 + "\nThis is a paper-trading research benchmark, not advice to a person. Use only the supplied frozen packet. Do not infer future information. Return one action for every ticker. Keep each reason under 220 characters.",
             },
-            {"role": "user", "content": market_prompt(packet)},
+            {"role": "user", "content": market_prompt(packet, portfolio)},
         ],
         "max_tokens": 1200,
     }
@@ -317,8 +370,8 @@ def llm_decisions(model: str, packet: dict[str, Any], system: str) -> dict[str, 
         parsed = json.loads(content)
     return normalize_bundle(parsed["decisions"], model, latency, data.get("usage"))
 
-def jev_decisions(packet: dict[str, Any], *, extra_state=None, model_id=JEV_MODEL) -> dict[str, Any]:
-    state = {"market_packet": {k: packet[k] for k in ["frozen_at", "quotes", "news", "portfolio", "arena_rules"]}}
+def jev_decisions(packet: dict[str, Any], portfolio: dict[str, Any], *, extra_state=None, model_id=JEV_MODEL) -> dict[str, Any]:
+    state = {"market_packet": {k: packet[k] for k in ["frozen_at", "quotes", "news", "arena_rules"]}, "portfolio": portfolio}
     if extra_state is not None:
         state["astra_theses"] = extra_state
     criteria = {
@@ -359,7 +412,7 @@ def jev_decisions(packet: dict[str, Any], *, extra_state=None, model_id=JEV_MODE
         }
     return normalize_bundle(decisions, model_id, latency, data.get("usage"), extra={"jev_raw_model": data.get("model")})
 
-def astra_theses(packet: dict[str, Any]) -> tuple[dict[str, Any], int, Any]:
+def astra_theses(packet: dict[str, Any], portfolio: dict[str, Any]) -> tuple[dict[str, Any], int, Any]:
     schema = {
         "type": "object",
         "additionalProperties": False,
@@ -392,7 +445,7 @@ def astra_theses(packet: dict[str, Any]) -> tuple[dict[str, Any], int, Any]:
                 "role": "system",
                 "content": "You are the slow research layer in a paper-trading decision benchmark. Use only the supplied frozen packet. For each ticker, write a compact market thesis, a concrete invalidation condition, and an evidence-quality label. Do not choose an action and do not use future information.",
             },
-            {"role": "user", "content": market_prompt(packet)},
+            {"role": "user", "content": market_prompt(packet, portfolio)},
         ],
         "response_format": {"type": "json_schema", "json_schema": {"name": "marketarena_theses", "strict": True, "schema": schema}},
         "reasoning": {"effort": "medium"},
@@ -402,21 +455,23 @@ def astra_theses(packet: dict[str, Any]) -> tuple[dict[str, Any], int, Any]:
     parsed = json.loads(data["choices"][0]["message"]["content"])
     return parsed["theses"], latency, data.get("usage")
 
-def hybrid_decisions(packet: dict[str, Any]) -> dict[str, Any]:
-    theses, astra_ms, astra_usage = astra_theses(packet)
-    jev = jev_decisions(packet, extra_state=theses)
+def hybrid_decisions(packet: dict[str, Any], portfolio: dict[str, Any]) -> dict[str, Any]:
+    theses, astra_ms, astra_usage = astra_theses(packet, portfolio)
+    jev = jev_decisions(packet, portfolio, extra_state=theses)
     jev["model_id"] = f"{ASTRA_MODEL}+{JEV_MODEL}"
     jev["latency_ms"] += astra_ms
     jev["extra"] = {"astra_theses": theses, "astra_usage": astra_usage, **(jev.get("extra") or {})}
     return jev
 
-def quant_decisions(packet: dict[str, Any]) -> dict[str, Any]:
+def quant_decisions(packet: dict[str, Any], portfolio: dict[str, Any] | None = None) -> dict[str, Any]:
     started = time.monotonic()
-    positions = packet["portfolio"]["positions"]
+    portfolio = portfolio or packet.get("portfolio") or {"positions": {}}
+    positions = portfolio["positions"]
     out = {}
     for ticker in TICKERS:
         chg = packet["quotes"][ticker].get("change_pct_vs_previous_close")
-        pos = float(positions.get(ticker, 0) or 0)
+        raw_pos = positions.get(ticker, 0) or 0
+        pos = float(raw_pos.get("qty", 0.0) if isinstance(raw_pos, dict) else raw_pos)
         if chg is None:
             action, reason = "ABSTAIN", "Missing previous-close comparison."
         elif chg >= 1.5:
@@ -430,25 +485,27 @@ def quant_decisions(packet: dict[str, Any]) -> dict[str, Any]:
         out[ticker] = {"action": action, "confidence": 1.0, "reason": reason}
     return normalize_bundle(out, "season0-gap-rule-v1", int((time.monotonic() - started) * 1000), {})
 
-def contestant_call(name: str, packet: dict[str, Any]) -> dict[str, Any]:
+def contestant_call(name: str, packet: dict[str, Any], portfolio: dict[str, Any]) -> dict[str, Any]:
     if name == "astra":
         return llm_decisions(
             ASTRA_MODEL,
             packet,
+            portfolio,
             "You are Astra, a deliberate research-first paper trader in MarketArena. Assess the supplied evidence conservatively and choose bounded actions.",
         )
     if name == "jev":
-        return jev_decisions(packet)
+        return jev_decisions(packet, portfolio)
     if name == "deepseek":
         return llm_decisions(
             DEEPSEEK_MODEL,
             packet,
+            portfolio,
             "You are DeepSeek, an independent general-purpose reasoning model competing in MarketArena. Use only the frozen packet and choose bounded paper-trading actions.",
         )
     if name == "quant":
-        return quant_decisions(packet)
+        return quant_decisions(packet, portfolio)
     if name == "hybrid":
-        return hybrid_decisions(packet)
+        return hybrid_decisions(packet, portfolio)
     raise KeyError(name)
 
 def commitment(bundle: dict[str, Any], nonce: str) -> str:
@@ -462,29 +519,34 @@ def prepare(args) -> None:
     if round_dir.exists() and (round_dir / "packet.json").exists():
         raise RuntimeError(f"round already exists: {args.round_id}")
     packet, raw, digest = make_packet(args.round_id)
+    account_snapshot, account_digest = freeze_account_snapshot(packet)
     round_dir.mkdir(parents=True, exist_ok=True)
     (round_dir / "packet.json").write_bytes(raw)
+    write_json(round_dir / "accounts_before.json", account_snapshot)
     state = public_state(args.round_id, packet, digest, args.decision_window, args.reveal_pause)
+    state["persistent_accounts"] = True
+    state["account_state_digest"] = account_digest
     write_json(round_dir / "public_state.json", state)
     write_json(
         ROOT / "rounds" / "current.json",
         {"round_id": args.round_id, "path": f"rounds/{args.round_id}/public_state.json", "packet": f"rounds/{args.round_id}/packet.json"},
     )
-    append_event(round_dir, "PACKET_FROZEN", {"packet_digest": digest, "frozen_at": packet["frozen_at"]})
+    append_event(round_dir, "PACKET_FROZEN", {"packet_digest": digest, "account_state_digest": account_digest, "frozen_at": packet["frozen_at"]})
     print(json.dumps({"round_id": args.round_id, "packet_digest": digest, "frozen_at": packet["frozen_at"]}))
 
 def decide(args) -> None:
     round_dir = ROOT / "rounds" / args.round_id
     packet = read_json(round_dir / "packet.json")
+    account_snapshot = read_json(round_dir / "accounts_before.json")
     state = read_json(round_dir / "public_state.json")
     deadline = dt.datetime.fromisoformat(state["decision_deadline"].replace("Z", "+00:00"))
     if utcnow() >= deadline:
         raise RuntimeError("decision window already closed")
-    names = ["astra", "jev", "deepseek", "quant", "hybrid"]
+    names = IDS
     results: dict[str, Any] = {}
     errors: dict[str, str] = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as ex:
-        futures = {ex.submit(contestant_call, n, packet): n for n in names}
+        futures = {ex.submit(contestant_call, n, packet, account_snapshot["accounts"][n]): n for n in names}
         remaining = max(1.0, (deadline - utcnow()).total_seconds())
         try:
             for fut in concurrent.futures.as_completed(futures, timeout=remaining):
