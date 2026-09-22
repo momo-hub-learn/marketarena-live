@@ -1,0 +1,23 @@
+{
+  "schema": "marketarena.marks.v1",
+  "round_id": "S0-R0003-LIVE",
+  "points": [
+    {
+      "ts": "2026-09-21T16:09:42.187422Z",
+      "status": "START",
+      "equity_usd": {"astra":10000,"jev":10000,"deepseek":10000,"quant":10000,"hybrid":10000}
+    },
+    {
+      "ts": "2026-09-21T16:14:08.136813Z",
+      "status": "INTRADAY",
+      "market_ts": "2026-09-21T16:14:06Z",
+      "equity_usd": {"astra":10000,"jev":10000,"deepseek":9997.573844,"quant":9997.654215,"hybrid":10000}
+    },
+    {
+      "ts": "2026-09-22T00:05:10.349831Z",
+      "status": "SETTLED",
+      "market_ts": "2026-09-21T19:59:00Z",
+      "equity_usd": {"astra":10000,"jev":10000,"deepseek":10029.705706,"quant":10021.174145,"hybrid":10000}
+    }
+  ]
+}
