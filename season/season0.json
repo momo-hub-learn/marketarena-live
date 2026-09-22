@@ -5,7 +5,7 @@
   "contestants": [
     {
       "id": "deepseek",
-      "name": "deepseek",
+      "name": "DeepSeek",
       "model_id": "deepseek/deepseek-v4.1-flash",
       "settled_rounds": 1,
       "revealed_rounds": 1,
@@ -33,7 +33,7 @@
     },
     {
       "id": "quant",
-      "name": "quant",
+      "name": "Quant",
       "model_id": "season0-gap-rule-v1",
       "settled_rounds": 1,
       "revealed_rounds": 2,
@@ -61,7 +61,7 @@
     },
     {
       "id": "jev",
-      "name": "jev",
+      "name": "Jev",
       "model_id": "typesafe/jev-1.13",
       "settled_rounds": 1,
       "revealed_rounds": 1,
@@ -88,7 +88,7 @@
     },
     {
       "id": "astra",
-      "name": "astra",
+      "name": "Astra",
       "model_id": "openai/gpt-6-astra",
       "settled_rounds": 1,
       "revealed_rounds": 0,
@@ -113,7 +113,7 @@
     },
     {
       "id": "hybrid",
-      "name": "hybrid",
+      "name": "Astra + Jev",
       "model_id": "openai/gpt-6-astra+typesafe/jev-1.13",
       "settled_rounds": 1,
       "revealed_rounds": 0,
@@ -138,12 +138,6 @@
     }
   ],
   "rounds": [
-    {
-      "round_id": "S0-R0001-OPENING-BELL-LIVE",
-      "phase": "DECIDING",
-      "packet_frozen_at": null,
-      "accounts": {}
-    },
     {
       "round_id": "S0-R0002-LIVE",
       "phase": "REVEALED",
