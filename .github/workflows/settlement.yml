@@ -11,7 +11,7 @@ on:
     paths:
       - rounds/SETTLE.json
   schedule:
-    - cron: "10 21 * * 1-5"
+    - cron: "*/15 13-21 * * 1-5"
 
 permissions:
   contents: write
@@ -27,30 +27,46 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
       - name: Resolve round
         id: cfg
         shell: bash
         run: |
           if [ -n "${{ inputs.round_id }}" ]; then
             RID="${{ inputs.round_id }}"
-          elif [ -f rounds/SETTLE.json ]; then
+          elif [ "${{ github.event_name }}" = "push" ] && [ -f rounds/SETTLE.json ]; then
             RID=$(python -c "import json; print(json.load(open('rounds/SETTLE.json')).get('round_id',''))")
           else
             RID=$(python -c "import json; print(json.load(open('rounds/current.json'))['round_id'])")
           fi
-          if [ -z "$RID" ]; then RID=$(python -c "import json; print(json.load(open('rounds/current.json'))['round_id'])"); fi
           echo "round_id=$RID" >> "$GITHUB_OUTPUT"
+          python - "$RID" <<'PY' >> "$GITHUB_OUTPUT"
+          import json, pathlib, sys
+          rid=sys.argv[1]
+          p=pathlib.Path("rounds")/rid
+          state=json.load(open(p/"public_state.json"))
+          reveal=(p/"reveal.json").exists()
+          print("markable="+("true" if reveal and state.get("phase")!="SETTLED" else "false"))
+          print("phase="+state.get("phase","UNKNOWN"))
+          PY
+
       - name: Mark / settle
+        if: steps.cfg.outputs.markable == 'true'
         run: python scripts/settle_round.py --round-id "${{ steps.cfg.outputs.round_id }}"
-      - name: Publish settlement
+
+      - name: Rebuild Season 0
+        run: python scripts/build_season.py
+
+      - name: Publish settlement and season table
         shell: bash
         run: |
           git config user.name "MarketArena Bot"
           git config user.email "marketarena-bot@users.noreply.github.com"
-          git add rounds
+          git add rounds season
           git diff --cached --quiet && exit 0
-          git commit -m "Mark ${{ steps.cfg.outputs.round_id }} paper portfolio"
+          git commit -m "Update ${{ steps.cfg.outputs.round_id }} live marks and Season 0"
           git push
