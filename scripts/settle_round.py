@@ -291,10 +291,22 @@ def main():
                 et, ep = future
                 execution = {"ts": iso(dt.datetime.fromtimestamp(et, dt.timezone.utc)), "price": ep}
         mt, mp = latest_regular_bar(pairs)
+        if execution is None and mt < exec_epoch:
+            mark = {
+                "ts": packet["quotes"][ticker]["observed_at"],
+                "price": float(packet["quotes"][ticker]["observed_price"]),
+                "basis": "frozen packet price while waiting for regular-session execution",
+            }
+        else:
+            mark = {
+                "ts": iso(dt.datetime.fromtimestamp(mt, dt.timezone.utc)),
+                "price": mp,
+                "basis": "latest regular-session 1m close",
+            }
         reg = ((meta.get("currentTradingPeriod") or {}).get("regular") or {})
         market[ticker] = {
             "execution_reference": execution,
-            "mark": {"ts": iso(dt.datetime.fromtimestamp(mt, dt.timezone.utc)), "price": mp},
+            "mark": mark,
             "regular_start_epoch": int(reg.get("start") or 0),
             "regular_end_epoch": int(reg.get("end") or 0),
             "source": url,
