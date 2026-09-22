@@ -1,64 +1,67 @@
 # MarketArena
 
-> **Five decision systems. Same market. Same money. Same clock. The future settles the score.**
+> **Five AI traders. One market. One $10,000 bankroll each. No resets.**
 
 MarketArena is an auditable **paper-trading livestream / sequential-decision benchmark**.
 
 Season 0 contestants:
 
-- **Astra** — `openai/gpt-6-astra`
-- **Jev** — `typesafe/jev-1.13`
-- **DeepSeek** — `deepseek/deepseek-v4.1-flash`
-- **Quant** — deterministic `season0-gap-rule-v1`
+- **Astra** — openai/gpt-6-astra
+- **Jev** — typesafe/jev-1.13
+- **DeepSeek** — deepseek/deepseek-v4.1-flash
+- **Quant** — deterministic season0-gap-rule-v1
 - **Astra + Jev** — slow thesis + fast structured decision
 
-The three model providers are called through a single operator-owned `OPENROUTER_API_KEY`. The secret is never committed to the repository.
+## The important rule: one account, one life
+
+Each trader gets **$10,000 once**. From the persistent-account migration after S0-R0003-LIVE, cash, shares, average cost and market exposure carry into the next round.
+
+A losing position is still there tomorrow. A **NO SHOW** does not reset the account: no new order is placed, while existing positions remain exposed to the market.
+
+The frozen rules live in season/CONSTITUTION.md. Material rule changes require a new season.
 
 ## What a live round does
 
-1. Fetches one point-in-time public market packet for AAPL / NVDA / AMZN / META.
-2. Writes the exact frozen packet and its SHA-256 digest to the public repo **before model decisions**.
-3. Sends the same packet and starting portfolio to all five contestants. No leaderboard or rival action is included.
-4. Salts and SHA-256 commits each full four-symbol action vector.
-5. Publishes commitments while actions remain private in the ephemeral Actions runner.
-6. Waits through a short sealed period, then reveals actions + nonces so anyone can recompute each proof.
-7. Preserves an append-only hash-linked event log.
+1. Freeze one point-in-time public market packet for AAPL / NVDA / AMZN / META.
+2. Freeze the five carried account snapshots and publish their digest.
+3. Give every contestant the same market packet plus **only its own** portfolio. No leaderboard or rival account/decision enters model context.
+4. Salt and SHA-256 commit each complete four-symbol action vector.
+5. Publish commitments before revealing the actions.
+6. Reveal actions + nonces and verify the commitments.
+7. Execute only against a **future** regular-session bar with deterministic adverse paper slippage.
+8. Mark all carried and new positions through the session and persist the settled account into the next round.
 
-Allowed actions: `ADD / HOLD / REDUCE / EXIT / ABSTAIN`.
+Allowed actions: ADD / HOLD / REDUCE / EXIT / ABSTAIN.
 
-## Start a round
+Season 0 sizing:
 
-The operator sets one GitHub Actions secret:
+- ADD: buy up to 10% of round-start paper equity, capped by cash.
+- REDUCE: sell up to 10% of round-start paper equity, capped by the existing long.
+- EXIT: sell the entire existing long.
+- HOLD / ABSTAIN: no order.
+- No leverage. No shorting.
+- 5 bps adverse paper slippage.
 
-```text
-OPENROUTER_API_KEY
-```
+## Live automation
 
-Then either dispatch **Run paper-live round** in Actions, or update `rounds/START.json` with a new round ID. The default first real model round is `S0-R0002-LIVE`.
+The opening workflow is scheduled for the New York opening window. The mark/settlement worker refreshes paper accounts during the session and finalizes after the regular close.
 
-The live workflow intentionally records a provider failure as `NO_SHOW`; it does not manufacture or backfill an answer after the decision window.
+The provider layer uses one operator-owned GitHub Actions secret named OPENROUTER_API_KEY.
 
-## Model endpoints
+Provider failure is recorded as NO_SHOW; MarketArena never manufactures a missing answer after the deadline.
 
-- Astra and DeepSeek: OpenRouter `POST /api/v1/chat/completions` with strict JSON-schema output.
-- Jev: OpenRouter `POST /api/alpha/decisions`, model pinned to `typesafe/jev-1.13`.
-- Hybrid: one Astra thesis call, followed by a Jev bounded-action call.
-- Quant: fixed ±1.5% previous-close rule; it cannot access an LLM.
+## Audit artifacts
 
-## Data boundary
+Each persistent-era round publishes packet.json, accounts_before.json, public_state.json, events.jsonl, reveal.json, settlement.json and marks.json.
 
-The current live packet uses Yahoo Finance public chart/search endpoints at workflow runtime. That is enough for a transparent public experiment, **not** an exchange-grade or licensed production feed. The repository records source URLs, timestamps and this limitation in every packet.
+The public season state is stored in season/season0_accounts.json, season/season0.json and season/CONSTITUTION.md.
 
 ## Tests
 
-Run:
+Run: python -m unittest discover -s tests -v
 
-```bash
-python -m unittest discover -s tests -v
-```
+CI verifies commitment round-trips, bounded actions, deterministic Quant logic, persistent position marking, compounding adds, reductions that cannot cross into shorts, and NO SHOW exposure persistence.
 
-The first code-backed suite verifies proof round-trips, deterministic Quant behavior, bounded actions and canonical hashing. Additional public audit checks live in the round artifacts themselves.
+## Data and research boundary
 
-## Research boundary
-
-MarketArena is a research/entertainment paper-trading experiment, not investment advice. Short paper results do not establish durable alpha, model superiority, or real-money trading performance.
+MarketArena is a research/entertainment **paper-trading** experiment, not investment advice. Current market packets use public Yahoo Finance chart/search endpoints, not an exchange-grade licensed feed. Short paper results do not establish durable alpha, model superiority, or real-money trading performance.
